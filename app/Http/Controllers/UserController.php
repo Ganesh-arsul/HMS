@@ -20,7 +20,14 @@ class UserController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        $user = User::create($request->only(['name', 'email', 'password', 'role']));
+        // Hash the password before saving
+        $user = User::create([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => bcrypt($request->input('password')),
+            'role' => $request->input('role'),
+        ]);
+
         return response()->json(['success' => true, 'data' => $user], 201);
     }
 
@@ -38,7 +45,8 @@ class UserController extends Controller
             'email' => 'sometimes|email|unique:users,email,' . $id,
         ]);
 
-        $user->update($request->all());
+        // Only update allowed fields
+        $user->update($request->only(['name', 'email', 'role']));
         return response()->json(['success' => true, 'data' => $user]);
     }
 
